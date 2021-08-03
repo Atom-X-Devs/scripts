@@ -22,28 +22,23 @@ msg() {
     echo -e "\e[1;32m$*\e[0m"
 }
 
-err() {
-    echo -e "\e[1;41m$*\e[0m"
-}
-
 ##------------------------------------------------------##
 ##----------Basic Informations, COMPULSORY--------------##
 
 # The defult directory where the kernel should be placed
 KERNEL_DIR=$PWD
 
-# The name of the device for which the kernel is built
-MODEL="Asus Zenfone Max Pro M1"
-
 # The codename of the device
 DEVICE="X00TD"
 
-# The defconfig which should be used. Get it from config.gz from
-# your device or check source
+# Define Build User
+USER="ElectroPerf"
+
+# The defconfig which should be used.
 DEFCONFIG=asus/X00TD_defconfig
 
-# Show manufacturer info
-MANUFACTURERINFO="ASUSTek Computer Inc."
+# Make savedefconfig
+MAKE_SAVEDEFCONFIG=0
 
 # Define Kernel Arch
 KARCH=arm64
@@ -51,45 +46,52 @@ KARCH=arm64
 # Commit Your Changes
 AUTO_COMMIT=0
 
-	msg "|| Export Kernel Arch ||"
+# Silence Kbuild logging (msgs)
+SILENCE=0
 
-	export ARCH=$KARCH
+# Do not touch !
+	msg "|| Cleaning Source ||"
 
-	msg "|| Cleaning Sources ||"
-
-	make clean && make mrproper
+	make clean mrproper distclean
 
 	msg "|| Regenerating Defconfig ||"
 
-		export KBUILD_BUILD_USER="ElectroPerf"
-		TC_DIR=$KERNEL_DIR/clang
-		KBUILD_COMPILER_STRING=$("$TC_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-		PATH=$TC_DIR/bin/:$PATH
+	if [[ "$SILENCE" == "1" ]]; then
+		FLAG='-s'
+	fi
+	
+	COMPILER_STRING=$($KERNEL_DIR/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
-	export PATH KBUILD_COMPILER_STRING
-	PROCS=$(nproc --all)
-	export PROCS
-
-	make O=out $DEFCONFIG \
-                   CROSS_COMPILE=aarch64-linux-gnu- \
+	make O=out $DEFCONFIG $FLAG                       \
+                   LLVM=1                                 \
+   		   ARCH=$KARCH                            \
+   	           KBUILD_BUILD_USER=$USER                \
+   	           PATH=$KERNEL_DIR/clang/bin/:$PATH      \
+                   CROSS_COMPILE=aarch64-linux-gnu-       \
                    CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                   CC=clang \
-                   LLVM=1 \
-		   LD="ld.lld"
+		   KBUILD_COMPILER_STRING=$COMPILER_STRING
 
 	msg "|| Removing Old Defconfig ||"
 
 	rm -rf arch/$KARCH/configs/$DEFCONFIG
 
-	msg "|| Moving Regenerated Defconfig ||"
+	if [[ "$MAKE_SAVEDEFCONFIG" == "1" ]]; then
+		msg "|| Making Savedefconfig ||"
+		
+		make O=out savedefconfig $FLAG
+		
+		msg "|| Moving Regenerated Defconfig ||"
 
-	mv out/.config arch/$KARCH/configs/$DEFCONFIG
+		mv out/defconfig arch/$KARCH/configs/$DEFCONFIG	
+	else
+		msg "|| Moving Regenerated Defconfig ||"
 
-	if [ $AUTO_COMMIT = 1 ]
-	then
+		mv out/.config arch/$KARCH/configs/$DEFCONFIG	
+	fi
+
+	if [[ "$AUTO_COMMIT" == "1" ]]; then
 		msg "|| Commiting Changes ||"
 
 		git add arch/$KARCH/configs/$DEFCONFIG
-		git commit -m "$DEFCONFIG: Regenerate" --signoff
-
+		git commit -sSm "$DEFCONFIG: Regenerate"
 	fi
