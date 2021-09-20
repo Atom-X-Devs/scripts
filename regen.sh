@@ -45,6 +45,9 @@ DEFCONFIG=asus/X00TD_defconfig
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
+# Clone Toolchain
+git clone --depth=1 git@gitlab.com:ElectroPerf/atom-x-clang.git clang
+
 # Define Kernel Arch
 KARCH=arm64
 
@@ -61,7 +64,7 @@ AUTO_COMMIT=0
 
 	msg "|| Regenerating Defconfig ||"
 
-		export KBUILD_BUILD_USER="ElectroPerf"
+		export KBUILD_BUILD_USER="Kunmun@Atom-X-Devs"
 		TC_DIR=$KERNEL_DIR/clang
 		KBUILD_COMPILER_STRING=$("$TC_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 		PATH=$TC_DIR/bin/:$PATH
@@ -70,20 +73,19 @@ AUTO_COMMIT=0
 	PROCS=$(nproc --all)
 	export PROCS
 
+	msg "|| Make Defconfig ||"
 	make O=out $DEFCONFIG \
-                   CROSS_COMPILE=aarch64-linux-gnu- \
-                   CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                   CC=clang \
-                   LLVM=1 \
-		   LD="ld.lld"
-
-	msg "|| Removing Old Defconfig ||"
-
-	rm -rf arch/$KARCH/configs/$DEFCONFIG
+			CROSS_COMPILE=aarch64-linux-gnu- \
+			CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+			CC=clang \
+			LLVM=1 \
+			LLVM_IAS=1 \
+			LD="ld.lld" \
+			LD_LIBRARY_PATH=$TC_DIR/lib
 
 	msg "|| Moving Regenerated Defconfig ||"
 
-	mv out/.config arch/$KARCH/configs/$DEFCONFIG
+	cp -af out/.config arch/$KARCH/configs/$DEFCONFIG
 
 	if [ $AUTO_COMMIT = 1 ]
 	then

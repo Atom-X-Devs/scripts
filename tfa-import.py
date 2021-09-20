@@ -8,6 +8,6 @@ def mergeCAF(x,path):
     os.system("git commit -s -m '"+mas+"'")
 
 branch = input("Enter tfa98xx branch: ")
-tfa98xx = "http://mumbai.source.codeaurora.org/external/mas/tfa98xx "+branch
+tfa98xx = "http://source.codeaurora.org/external/mas/tfa98xx "+branch
 
 mergeCAF(tfa98xx,"techpack/audio/asoc/codecs/tfa9874")
