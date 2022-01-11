@@ -7,13 +7,6 @@
 # Version v5
 #
 
-WORK_DIR=$1
-DEFAULT_DIR=`pwd`
-if [[ "WORK_DIR" != "" ]]; then
-    DEFAULT_DIR=$WORK_DIR
-fi
-cd $DEFAULT_DIR
-
 # Aliases
 cai='git commit --amend --no-edit'
 ci='git commit --no-edit'
@@ -70,7 +63,7 @@ if [[ ! -d "$dir" ]]; then
                  for sdm660 and sm7325 respectively'
     fi
 
-    msg="Arm64: boot: vendor: add $soc dts"
+    msg="ARM64: dts/qcom: $soc: Import vendor device tree overlay"
     $sa=$dir $repo main -m "$msg" && $cai
     success "dts successfully import for $soc on $kv"
     exit 0
@@ -84,7 +77,7 @@ function readcmd() {
     case $cmd in
         s)
             tag=$(echo '`DUMMY_TAG`' | sed s/DUMMY_TAG/$br/g)
-            $f/$mod $br && $sa=$dir caf/$mod $br -m "$msg from `echo $tag`" && $cai
+            $f/$mod $br && $sa=$dir caf/$mod $br -m "$msg `echo $tag`" && $cai
         ;;
         m)
             if [ $option = 'u' ]; then
@@ -146,10 +139,10 @@ function indicatemodir() {
     esac
 
     if [ $num -lt '4' ]; then
-        msg="Staging: Import $mod"
+        msg="drivers: $mod: Import from"
         dir=$ds/$mod
     else
-        msg="Techpack: Import $mod"
+        msg="techpack: $mod: Import from"
         dir=$tp/$prefix
     fi
     process
