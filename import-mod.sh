@@ -3,9 +3,16 @@
 # Copyright (C) 2020 Pig <pig.priv@gmail.com>
 # Copyright (C) 2021 Divyanshu-Modi <divyan.m05@gmail.com>
 #
-# Simple script to import/update kernel modules
-# Version v2
+# Simple script for kernel imports
+# Version v5
 #
+
+WORK_DIR=$1
+DEFAULT_DIR=`pwd`
+if [[ "WORK_DIR" != "" ]]; then
+    DEFAULT_DIR=$WORK_DIR
+fi
+cd $DEFAULT_DIR
 
 # Aliases
 cai='git commit --amend --no-edit'
@@ -19,6 +26,8 @@ os='opensource'
 qc='qcom'
 r='git read-tree --prefix'
 rm='https://source.codeaurora.org/quic/la/platform/vendor'
+# private repository
+repo='https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree'
 rma='git remote add caf'
 sa='git subtree add --prefix'
 tp='techpack'
@@ -33,6 +42,7 @@ wl=$qc-$os/wlan
     W='\033[1;37m'
 
 error () {
+    clear
     echo -e ""
     echo -e "$R Error! $W$1"
     echo -e ""
@@ -45,12 +55,36 @@ success () {
     echo -e ""
 }
 
+# Import dts
+function dts_import() {
+if [[ ! -d "$dir" ]]; then
+    success "Only usable by Atom-X-Devs if default repo"
+    if [ $kv = '4.19' ]; then
+        soc="sdm660/636"
+    elif [ $kv = '5.4' ]; then
+        soc="sm7325 (yupik)"
+        repo=${repo}_5.4
+    else
+        error 'Invalid target kernel version,\
+                 supported kernel versions are 4.19 and 5.4\
+                 for sdm660 and sm7325 respectively'
+    fi
+
+    msg="Arm64: boot: vendor: add $soc dts"
+    $sa=$dir $repo main -m "$msg" && $cai
+    success "dts successfully import for $soc on $kv"
+    exit 0
+else
+    error "Dts dir already present."
+fi
+}
+
 # Read git cmd
 function readcmd() {
     case $cmd in
         s)
             tag=$(echo '`DUMMY_TAG`' | sed s/DUMMY_TAG/$br/g)
-            $f/$mod $br && $sa=$dir caf/$mod $br -m "$msg `echo $tag`" && $cai
+            $f/$mod $br && $sa=$dir caf/$mod $br -m "$msg from `echo $tag`" && $cai
         ;;
         m)
             if [ $option = 'u' ]; then
@@ -86,16 +120,24 @@ function indicatemodir() {
             prefix=camera
         ;;
         6)
+            mod=data-kernel
+            prefix=data
+        ;;
+        7)
             mod=dataipa
             prefix=$mod
         ;;
-        7)
+        8)
             mod=display-drivers
             prefix=display
         ;;
-        8)
+        9)
             mod=video-driver
             prefix=video
+        ;;
+        10)
+            dir='arch/arm64/boot/dts/vendor'
+            dts_import
         ;;
         *)
             clear
@@ -104,10 +146,10 @@ function indicatemodir() {
     esac
 
     if [ $num -lt '4' ]; then
-        msg="drivers: $mod: Import from"
+        msg="Staging: Import $mod"
         dir=$ds/$mod
     else
-        msg="techpack: $mod: Import from"
+        msg="Techpack: Import $mod"
         dir=$tp/$prefix
     fi
     process
@@ -120,6 +162,8 @@ if [ "$(cat .git/config | grep $mod)" ]; then
 else
     if [ $num -lt '4' ]; then
         $rma/$mod $rm/$wl/$mod
+    elif [ $num = '6' ]; then
+        $rma/$mod $rm/$qc-$os/$mod
     else
         $rma/$mod $rm/$os/$mod
     fi
@@ -136,14 +180,17 @@ echo "Available modules
     3.fw-api
     4.audio-kernel
     5.camera-kernel
-    6.dataipa
-    7.display-drivers
-    8.video-driver
+    6.data-kernel
+    7.dataipa
+    8.display-drivers
+    9.video-driver
+    10.device tree source
                     "
 
 read -p "Target kernel module: " num
 case $num in
-    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)
+    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)
+    if [ $num -lt '10' ]; then
         read -p "Target tag / branch: " br
         read -p "Import (i) / Update (u): " option
         if [ $option != u ]; then
@@ -151,6 +198,9 @@ case $num in
         else
             cmd=m
         fi
+    else
+        read -p "Target kernel version: " kv
+    fi
 esac
 indicatemodir
 }
@@ -161,7 +211,7 @@ function moduler() {
         addremote
     fi
     case $mod in
-        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel |  dataipa | display-drivers | video-driver)
+        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel | data-kernel | dataipa | display-drivers | video-driver | dts)
         readcmd
         success "Import from target ${br} for target ${mod} done."
     esac
