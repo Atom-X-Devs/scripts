@@ -19,6 +19,7 @@ os='opensource'
 qc='qcom'
 r='git read-tree --prefix'
 rm='https://source.codeaurora.org/quic/la/platform/vendor'
+e='https://github.com/arter97/exfat-linux'
 # private repository
 repo='https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree'
 rma='git remote add caf'
@@ -69,6 +70,20 @@ if [[ ! -d "$dir" ]]; then
     exit 0
 else
     error "Dts dir already present."
+fi
+}
+
+# Import exFAT
+function exfat_import() {
+if [[ ! -d "$dir" ]]; then
+    success "Beginning exFAT import"
+
+    msg="fs: Import exFAT driver"
+    $sa=$dir $e master -m "$msg" && $cai
+    success "Successfully imported exFAT" $cmd
+    exit 0
+else
+    error "exFAT is already present"
 fi
 }
 
@@ -132,6 +147,10 @@ function indicatemodir() {
             dir='arch/arm64/boot/dts/vendor'
             dts_import
         ;;
+        11)
+            dir='fs/exfat'
+            exfat_import
+        ;;
         *)
             clear
             error "Invalid target input, aborting!"
@@ -178,11 +197,12 @@ echo "Available modules
     8.display-drivers
     9.video-driver
     10.device tree source
+    11.exFAT driver
                     "
 
 read -p "Target kernel module: " num
 case $num in
-    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)
+    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11)
     if [ $num -lt '10' ]; then
         read -p "Target tag / branch: " br
         read -p "Import (i) / Update (u): " option
@@ -191,7 +211,7 @@ case $num in
         else
             cmd=m
         fi
-    else
+    elif [ $num = '10' ]; then
         read -p "Target kernel version: " kv
     fi
 esac
@@ -204,7 +224,7 @@ function moduler() {
         addremote
     fi
     case $mod in
-        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel | data-kernel | dataipa | display-drivers | video-driver | dts)
+        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel | data-kernel | dataipa | display-drivers | video-driver | dts | exFAT)
         readcmd
         success "Import from target ${br} for target ${mod} done."
     esac
