@@ -52,7 +52,7 @@ success () {
 # Import dts
 function dts_import() {
 if [[ ! -d "$dir" ]]; then
-    success "Only usable by Atom-X-Devs if default repo"
+    success "Note: Only usable by Atom-X-Devs"
     if [ $kv = '4.19' ]; then
         soc="sdm660/636"
     elif [ $kv = '5.4' ]; then
@@ -64,12 +64,12 @@ if [[ ! -d "$dir" ]]; then
                  for sdm660 and sm7325 respectively'
     fi
 
-    msg="ARM64: dts/qcom: $soc: Import vendor device tree overlay"
+    msg="ARM64: dts/qcom: Import vendor device tree overlay for $soc"
     $sa=$dir $repo main -m "$msg" && $cai
-    success "dts successfully import for $soc on $kv"
+    success "Successfully imported DTS for $soc on $kv"
     exit 0
 else
-    error "Dts dir already present."
+    error "DTS directory is already present."
 fi
 }
 
@@ -158,7 +158,7 @@ function indicatemodir() {
     esac
 
     if [ $num -lt '4' ]; then
-        msg="drivers: $mod: Import from"
+        msg="staging: $mod: Import from"
         dir=$ds/$mod
     else
         msg="techpack: $mod: Import from"
