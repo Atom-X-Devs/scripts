@@ -18,7 +18,7 @@ ms='git merge -X subtree'
 os='opensource'
 qc='qcom'
 r='git read-tree --prefix'
-rm='https://source.codeaurora.org/quic/la/platform/vendor'
+rm='https://git.codelinaro.org/clo/la/platform/vendor'
 e='https://github.com/arter97/exfat-linux'
 # private repository
 repo='https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree'
