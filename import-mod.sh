@@ -20,6 +20,7 @@ qc='qcom'
 r='git read-tree --prefix'
 rm='https://git.codelinaro.org/clo/la/platform/vendor'
 e='https://github.com/arter97/exfat-linux'
+kp='https://github.com/dakkshesh07/Kprofiles'
 # private repository
 repo='https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree'
 rma='git remote add caf'
@@ -87,6 +88,20 @@ else
 fi
 }
 
+# Import Kprofiles
+function kprofiles_import() {
+if [[ ! -d "$dir" ]]; then
+    success "Beginning Kprofiles import"
+
+    msg="drivers/misc: Introduce KernelSpace Profile Modes"
+    $sa=$dir $kp main -m "$msg" && $cai
+    success "Successfully imported Kprofiles" $cmd
+    exit 0
+else
+    error "Kprofiles is already present"
+fi
+}
+
 # Read git cmd
 function readcmd() {
     case $cmd in
@@ -151,6 +166,10 @@ function indicatemodir() {
             dir='fs/exfat'
             exfat_import
         ;;
+        12)
+            dir='drivers/misc/kprofiles'
+            kprofiles_import
+        ;;
         *)
             clear
             error "Invalid target input, aborting!"
@@ -198,11 +217,12 @@ echo "Available modules
     9.video-driver
     10.device tree source
     11.exFAT driver
+    12.kprofiles
                     "
 
 read -p "Target kernel module: " num
 case $num in
-    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11)
+    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12)
     if [ $num -lt '10' ]; then
         read -p "Target tag / branch: " br
         read -p "Import (i) / Update (u): " option
@@ -224,7 +244,7 @@ function moduler() {
         addremote
     fi
     case $mod in
-        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel | data-kernel | dataipa | display-drivers | video-driver | dts | exFAT)
+        qcacld-3.0 | qca-wifi-host-cmn | fw-api | audio-kernel | camera-kernel | data-kernel | dataipa | display-drivers | video-driver | dts | exFAT | kprofiles)
         readcmd
         success "Import from target ${br} for target ${mod} done."
     esac
