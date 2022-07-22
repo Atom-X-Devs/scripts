@@ -125,7 +125,7 @@ readcmd()
 	case $cmd in
 		s)
 			msg1=$(echo '`DUMMY_TAG`' | sed s/DUMMY_TAG/"$br"/g)
-			importer "SUBTREE" "$dir" clo/"$mod" "$br" main "$msg from $msg1"
+			importer "SUBTREE" "$dir" clo/"$mod" "$br" "$msg from $msg1"
 			;;
 		m)
 			if [ "$option" = 'u' ]; then
