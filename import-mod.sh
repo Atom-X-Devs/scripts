@@ -23,8 +23,7 @@ echo -e "$G  _/ // /  / / ____/ /_/ / _, _/ / / / /___/ _, _/  "
 echo -e "$G /___/_/  /_/_/    \____/_/ |_| /_/ /_____/_/ |_|   "
 echo -e "$W"
 
-error()
-{
+error() {
 	clear
 	echo -e ""
 	echo -e "$R Error! $W" "$@"
@@ -32,8 +31,7 @@ error()
 	exit 1
 }
 
-success()
-{
+success() {
 	echo -e ""
 	echo -e "$G" "$@" "$W"
 	echo -e ""
@@ -41,38 +39,36 @@ success()
 }
 
 # Commonised Importer
-importer()
-{
+importer() {
 	MTD=$1
 	DIR=$2
 	REPO=$3
 	TAG=$4
-	if [[ -d $DIR && "$MTD" == "SUBTREE" ]]; then
+	if [[ -d $DIR && $MTD == "SUBTREE" ]]; then
 		error "$DIR directory is already present."
 	fi
-	if [[ "$MTD" == MERGE || "$MTD" == UPDATE ]]; then
+	if [[ $MTD == MERGE || $MTD == UPDATE ]]; then
 		git fetch "$REPO" "$TAG"
 	fi
 	case "$MTD" in
-		SUBTREE)
-			MSG=$5
-			git subtree add --prefix="$DIR" "$REPO" "$TAG" -m "$MSG"
-			git commit --amend --no-edit
-			;;
-		MERGE)
-			git merge --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
-			git read-tree --prefix="$DIR" -u FETCH_HEAD
-			git commit --no-edit
-			;;
-		UPDATE)
-			git merge -X subtree="$DIR" FETCH_HEAD --no-edit
-			;;
+	SUBTREE)
+		MSG=$5
+		git subtree add --prefix="$DIR" "$REPO" "$TAG" -m "$MSG"
+		git commit --amend --no-edit
+		;;
+	MERGE)
+		git merge --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
+		git read-tree --prefix="$DIR" -u FETCH_HEAD
+		git commit --no-edit
+		;;
+	UPDATE)
+		git merge -X subtree="$DIR" FETCH_HEAD --no-edit
+		;;
 	esac
 }
 
 # Import dts
-dts_import()
-{
+dts_import() {
 	if [ "$kv" = '4.19' ]; then
 		msg="Arm64: dts/vendor: Import dts for sdm660 family"
 		importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree "$msg"
@@ -91,44 +87,40 @@ dts_import()
 }
 
 # Import exFAT
-exfat_import()
-{
+exfat_import() {
 	importer "SUBTREE" "fs/exfat" https://github.com/arter97/exfat-linux master "fs: Import exFAT driver"
 	success "Successfully imported exFAT" "$cmd"
 }
 
 # Import Kprofiles
-kprofiles_import()
-{
+kprofiles_import() {
 	msg="drivers/misc: Introduce KernelSpace Profile Modes"
 	importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
 	success "Successfully imported Kprofiles" "$cmd"
 }
 
 # Read git cmd
-readcmd()
-{
+readcmd() {
 	case $cmd in
-		s)
-			msg1=$(echo '`DUMMY_TAG`' | sed s/DUMMY_TAG/"$br"/g)
-			importer "SUBTREE" "$dir" clo/"$mod" "$br" "$msg from $msg1"
-			;;
-		m)
-			if [ "$option" = 'u' ]; then
-				importer "UPDATE" "$dir" clo/"$mod" "$br"
-			else
-				importer "MERGE" "$dir" clo/"$mod" "$br"
-			fi
-			;;
-		*)
-			error "Invalid target cmd, aborting!"
-			;;
+	s)
+		msg1=$(echo '`DUMMY_TAG`' | sed s/DUMMY_TAG/"$br"/g)
+		importer "SUBTREE" "$dir" clo/"$mod" "$br" "$msg from $msg1"
+		;;
+	m)
+		if [ "$option" = 'u' ]; then
+			importer "UPDATE" "$dir" clo/"$mod" "$br"
+		else
+			importer "MERGE" "$dir" clo/"$mod" "$br"
+		fi
+		;;
+	*)
+		error "Invalid target cmd, aborting!"
+		;;
 	esac
 }
 
 # Add remote
-addremote()
-{
+addremote() {
 	if [ "$num" -lt '4' ]; then
 		url=qcom-opensource/wlan/$mod
 	elif [ "$num" = '6' ]; then
@@ -144,8 +136,7 @@ addremote()
 }
 
 # Update/Import modules
-moduler()
-{
+moduler() {
 	if [ "$num" -lt '4' ]; then
 		msg="staging: $mod: Import"
 		dir="drivers/staging/$mod"
@@ -156,7 +147,7 @@ moduler()
 	if ! grep -q "$mod" .git/config; then
 		addremote
 	fi
-	if [[ -d $dir && "$option" == "u" ]]; then
+	if [[ -d $dir && $option == "u" ]]; then
 		cmd=m
 	fi
 	readcmd
@@ -170,67 +161,66 @@ moduler()
 }
 
 # Indicate module directories
-indicatemodir()
-{
+indicatemodir() {
 	if [[ $br == "" ]]; then
 		error "tag not defined"
 	fi
 
 	case $num in
-		1)
-			mod=qcacld-3.0
-			;;
-		2)
-			mod=qca-wifi-host-cmn
-			;;
-		3)
-			mod=fw-api
-			;;
-		4)
-			mod=audio-kernel
-			prefix=audio
-			;;
-		5)
-			mod=camera-kernel
-			prefix=camera
-			;;
-		6)
-			mod=data-kernel
-			prefix=data
-			;;
-		7)
-			mod=datarmnet
-			prefix=$mod
-			;;
-		8)
-			mod=datarmnet-ext
-			prefix=$mod
-			;;
-		9)
-			mod=dataipa
-			prefix=$mod
-			;;
-		10)
-			mod=display-drivers
-			prefix=display
-			;;
-		11)
-			mod=video-driver
-			prefix=video
-			;;
-		12)
-			dts_import
-			;;
-		13)
-			exfat_import
-			;;
-		14)
-			kprofiles_import
-			;;
-		*)
-			clear
-			error "Invalid target input, aborting!"
-			;;
+	1)
+		mod=qcacld-3.0
+		;;
+	2)
+		mod=qca-wifi-host-cmn
+		;;
+	3)
+		mod=fw-api
+		;;
+	4)
+		mod=audio-kernel
+		prefix=audio
+		;;
+	5)
+		mod=camera-kernel
+		prefix=camera
+		;;
+	6)
+		mod=data-kernel
+		prefix=data
+		;;
+	7)
+		mod=datarmnet
+		prefix=$mod
+		;;
+	8)
+		mod=datarmnet-ext
+		prefix=$mod
+		;;
+	9)
+		mod=dataipa
+		prefix=$mod
+		;;
+	10)
+		mod=display-drivers
+		prefix=display
+		;;
+	11)
+		mod=video-driver
+		prefix=video
+		;;
+	12)
+		dts_import
+		;;
+	13)
+		exfat_import
+		;;
+	14)
+		kprofiles_import
+		;;
+	*)
+		clear
+		error "Invalid target input, aborting!"
+		;;
 	esac
 
 	if [ "$num" -lt '12' ]; then
@@ -239,8 +229,7 @@ indicatemodir()
 }
 
 # Initialize
-init()
-{
+init() {
 	COLUMNS=45
 	PS3="Select a module: "
 	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "audio-kernel"
@@ -249,26 +238,26 @@ init()
 	select modules in "${options[@]}"; do
 		num=$REPLY
 		case $num in
-			1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)
-				if [ "$num" -le '11' ]; then
-					if [[ -z $br ]]; then
-						read -rp "Target tag / branch: " br
-					fi
-					read -rp "Import (i) / Update (u): " option
-					if [ "$option" != u ]; then
-						read -rp "Target cmd: merge (m) subtree (s) " cmd
-					else
-						cmd=m
-					fi
-				elif [[ "$num" == "12" ]]; then
-					read -rp "Target kernel version: " kv
+		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)
+			if [ "$num" -le '11' ]; then
+				if [[ -z $br ]]; then
+					read -rp "Target tag / branch: " br
 				fi
-				indicatemodir
-				break
-				;;
-			*)
-				break
-				;;
+				read -rp "Import (i) / Update (u): " option
+				if [ "$option" != u ]; then
+					read -rp "Target cmd: merge (m) subtree (s) " cmd
+				else
+					cmd=m
+				fi
+			elif [[ $num == "12" ]]; then
+				read -rp "Target kernel version: " kv
+			fi
+			indicatemodir
+			break
+			;;
+		*)
+			break
+			;;
 		esac
 	done
 }
