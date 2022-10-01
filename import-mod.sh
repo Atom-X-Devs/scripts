@@ -92,6 +92,12 @@ exfat_import() {
 	success "Successfully imported exFAT" "$cmd"
 }
 
+# Import mainline exFAT
+mainline_exfat_import() {
+	importer "SUBTREE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "fs: Import mainline exFAT driver"
+	success "Successfully imported mainline exFAT" "$cmd"
+}
+
 # Import Kprofiles
 kprofiles_import() {
 	msg="drivers/misc: Introduce KernelSpace Profile Modes"
@@ -215,6 +221,9 @@ indicatemodir() {
 		exfat_import
 		;;
 	14)
+		mainline_exfat_import
+		;;
+	15)
 		kprofiles_import
 		;;
 	*)
@@ -234,11 +243,12 @@ init() {
 	PS3="Select a module: "
 	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "audio-kernel"
 		"camera-kernel" "data-kernel" "datarmnet" "datarmnet-ext"
-		"dataipa" "display-drivers" "video-driver" "device tree source" "exFAT driver" "kprofiles")
+		"dataipa" "display-drivers" "video-driver" "device tree source"
+		"exFAT driver" "mainline exFAT driver" "kprofiles")
 	select modules in "${options[@]}"; do
 		num=$REPLY
 		case $num in
-		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)
+		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15)
 			if [ "$num" -le '11' ]; then
 				if [[ -z $br ]]; then
 					read -rp "Target tag / branch: " br
