@@ -215,16 +215,16 @@ indicatemodir() {
 		prefix=video
 		;;
 	12)
-		dts_import
-		;;
-	13)
 		exfat_import
 		;;
-	14)
+	13)
 		mainline_exfat_import
 		;;
-	15)
+	14)
 		kprofiles_import
+		;;
+	15)
+		dts_import
 		;;
 	*)
 		clear
@@ -243,13 +243,13 @@ init() {
 	PS3="Select a module: "
 	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "audio-kernel"
 		"camera-kernel" "data-kernel" "datarmnet" "datarmnet-ext"
-		"dataipa" "display-drivers" "video-driver" "device tree source"
-		"exFAT driver" "mainline exFAT driver" "kprofiles")
+		"dataipa" "display-drivers" "video-driver" "exFAT driver"
+		"mainline exFAT driver" "kprofiles" "device tree source")
 	select modules in "${options[@]}"; do
 		num=$REPLY
 		case $num in
 		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15)
-			if [ "$num" -le '11' ]; then
+			if [ "$num" -le '15' ]; then
 				if [[ -z $br ]]; then
 					read -rp "Target tag / branch: " br
 				fi
@@ -259,7 +259,7 @@ init() {
 				else
 					cmd=m
 				fi
-			elif [[ $num == "12" ]]; then
+			elif [[ $num == "15" ]]; then
 				read -rp "Target kernel version: " kv
 			fi
 			indicatemodir
