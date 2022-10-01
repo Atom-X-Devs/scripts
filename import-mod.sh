@@ -274,7 +274,7 @@ init() {
 					read -rp "Target tag / branch: " br
 				fi
 				read -rp "Import (i) / Update (u): " option
-				if [ "$option" != u ]; then
+				if [[ "$option" != u && "$num" -lt '12' ]]; then
 					read -rp "Target cmd: merge (m) subtree (s) " cmd
 				else
 					cmd=m
