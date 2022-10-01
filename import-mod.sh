@@ -88,41 +88,41 @@ dts_import() {
 
 # Import exFAT
 exfat_import() {
-if [ "$option" = 'u' ]; then
-	msg="fs/exfat: Update from arter97/exfat-linux"
-	importer "UPDATE" "fs/exfat" https://github.com/arter97/exfat-linux master "$msg"
-	success "Successfully updated exFAT"
-else
-	msg="fs: Import exFAT driver"
-	importer "SUBTREE" "fs/exfat" https://github.com/arter97/exfat-linux master "$msg"
-	success "Successfully imported exFAT"
-fi
+	if [ "$option" = 'u' ]; then
+		msg="fs/exfat: Update from arter97/exfat-linux"
+		importer "UPDATE" "fs/exfat" https://github.com/arter97/exfat-linux master "$msg"
+		success "Successfully updated exFAT"
+	else
+		msg="fs: Import exFAT driver"
+		importer "SUBTREE" "fs/exfat" https://github.com/arter97/exfat-linux master "$msg"
+		success "Successfully imported exFAT"
+	fi
 }
 
 # Import mainline exFAT
 mainline_exfat_import() {
-if [ "$option" = 'u' ]; then
-	msg="fs/exfat: Update from namjaejeon/linux-exfat-oot"
-	importer "UPDATE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "$msg"
-	success "Successfully updated mainline exFAT"
-else
-	msg="fs: Import mainline exFAT driver"
-	importer "SUBTREE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "$msg"
-	success "Successfully imported mainline exFAT"
-fi
+	if [ "$option" = 'u' ]; then
+		msg="fs/exfat: Update from namjaejeon/linux-exfat-oot"
+		importer "UPDATE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "$msg"
+		success "Successfully updated mainline exFAT"
+	else
+		msg="fs: Import mainline exFAT driver"
+		importer "SUBTREE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "$msg"
+		success "Successfully imported mainline exFAT"
+	fi
 }
 
 # Import Kprofiles
 kprofiles_import() {
-if [ "$option" = 'u' ]; then
-	msg="kprofiles: Update from dakkshesh07/Kprofiles"
-	importer "UPDATE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
-	success "Successfully updated Kprofiles"
-else
-	msg="drivers/misc: Introduce KernelSpace Profile Modes"
-	importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
-	success "Successfully imported Kprofiles"
-fi
+	if [ "$option" = 'u' ]; then
+		msg="kprofiles: Update from dakkshesh07/Kprofiles"
+		importer "UPDATE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
+		success "Successfully updated Kprofiles"
+	else
+		msg="drivers/misc: Introduce KernelSpace Profile Modes"
+		importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
+		success "Successfully imported Kprofiles"
+	fi
 }
 
 # Read git cmd
