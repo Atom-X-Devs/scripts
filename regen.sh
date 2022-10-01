@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
  # Script For Regenerating Defconfig of Android arm64 Kernel
  #

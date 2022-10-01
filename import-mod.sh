@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (C) 2022 Divyanshu-Modi <divyan.m05@gmail.com>
 # based on <pig.priv@gmail.com> module importer
 
