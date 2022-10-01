@@ -37,6 +37,7 @@ success()
 	echo -e ""
 	echo -e "$G" "$@" "$W"
 	echo -e ""
+	exit 0
 }
 
 # Commonised Importer
@@ -46,6 +47,9 @@ importer()
 	DIR=$2
 	REPO=$3
 	TAG=$4
+	if [[ -d $DIR && "$MTD" == "SUBTREE" ]]; then
+		error "$DIR directory is already present."
+	fi
 	if [[ "$MTD" == MERGE || "$MTD" == UPDATE ]]; then
 		git fetch "$REPO" "$TAG"
 	fi
@@ -69,54 +73,36 @@ importer()
 # Import dts
 dts_import()
 {
-	if [[ ! -d $dir ]]; then
-		repo='https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree'
-		if [ "$kv" = '4.19' ]; then
-			soc="sdm660/636"
-		elif [ "$kv" = '5.4' ]; then
-			soc="sm7325 (yupik)"
-			repo=${repo}_5.4
-		else
-			error 'Invalid target kernel version,\
-				 supported kernel versions are 4.19 and 5.4\
-				 for sdm660 and sm7325 respectively'
-		fi
-
-		msg="ARM64: dts/qcom: Import vendor device tree overlay for $soc"
-		importer "SUBTREE" "arch/arm64/boot/dts/vendor" "$repo" main "$msg"
-		success "Successfully imported DTS for $soc on $kv"
+	if [ "$kv" = '4.19' ]; then
+		msg="Arm64: dts/vendor: Import dts for sdm660 family"
+		importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree "$msg"
+	elif [ "$kv" = '5.4' ]; then
+		msg="Arm64: dts/vendor: Import dts for lahaina family"
+		importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Divyanshu-Modi/kernel-devicetree AtomX "$msg"
+		msg="Arm64: dts/vendor: Import camera dts for lahaina family"
+		importer "SUBTREE" "arch/arm64/boot/dts/vendor/qcom/camera" https://github.com/Divyanshu-Modi/kernel-camera-devicetree main "$msg"
+		msg="Arm64: dts/vendor: Import display dts for lahaina family"
+		importer "SUBTREE" "arch/arm64/boot/dts/vendor/qcom/display" https://github.com/Divyanshu-Modi/kernel-display-devicetree main "$msg"
 	else
-		error "DTS directory is already present."
+		error 'Invalid target kernel version, supported kernel versions are 4.19 and 5.4'
 	fi
 
-	exit 0
+	success "Successfully imported DTS on $kv"
 }
 
 # Import exFAT
 exfat_import()
 {
-	if [[ ! -d $dir ]]; then
-		importer "SUBTREE" "fs/exfat" https://github.com/arter97/exfat-linux master "fs: Import exFAT driver"
-		success "Successfully imported exFAT" "$cmd"
-	else
-		error "exFAT is already present"
-	fi
-
-	exit 0
+	importer "SUBTREE" "fs/exfat" https://github.com/arter97/exfat-linux master "fs: Import exFAT driver"
+	success "Successfully imported exFAT" "$cmd"
 }
 
 # Import Kprofiles
 kprofiles_import()
 {
-	if [[ ! -d $dir ]]; then
-	    msg="drivers/misc: Introduce KernelSpace Profile Modes"
-		importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
-		success "Successfully imported Kprofiles" "$cmd"
-	else
-		error "Kprofiles is already present"
-	fi
-
-	exit 0
+	msg="drivers/misc: Introduce KernelSpace Profile Modes"
+	importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
+	success "Successfully imported Kprofiles" "$cmd"
 }
 
 # Read git cmd
@@ -160,6 +146,13 @@ addremote()
 # Update/Import modules
 moduler()
 {
+	if [ "$num" -lt '4' ]; then
+		msg="staging: $mod: Import"
+		dir="drivers/staging/$mod"
+	else
+		msg="techpack: $mod: Import"
+		dir="techpack/$prefix"
+	fi
 	if ! grep -q "$mod" .git/config; then
 		addremote
 	fi
@@ -240,14 +233,9 @@ indicatemodir()
 			;;
 	esac
 
-	if [ "$num" -lt '4' ]; then
-		msg="staging: $modules: Import"
-		dir="drivers/staging/$mod"
-	else
-		msg="techpack: $modules: Import"
-		dir="techpack/$prefix"
+	if [ "$num" -lt '12' ]; then
+		moduler
 	fi
-	moduler
 }
 
 # Initialize
@@ -263,7 +251,7 @@ init()
 		case $num in
 			1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14)
 				if [ "$num" -le '11' ]; then
-					if [[ $br == "" ]]; then
+					if [[ -z $br ]]; then
 						read -rp "Target tag / branch: " br
 					fi
 					read -rp "Import (i) / Update (u): " option
