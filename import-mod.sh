@@ -70,14 +70,14 @@ importer() {
 # Import dts
 dts_import() {
 	if [ "$kv" = '4.19' ]; then
-		msg="Arm64: dts/vendor: Import dts for sdm660 family"
+		msg="ARM64: dts/vendor: Import DTS for SDM660 family"
 		importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree "$msg"
 	elif [ "$kv" = '5.4' ]; then
-		msg="Arm64: dts/vendor: Import dts for lahaina family"
+		msg="ARM64: dts/vendor: Import DTS for lahaina family"
 		importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Divyanshu-Modi/kernel-devicetree AtomX "$msg"
-		msg="Arm64: dts/vendor: Import camera dts for lahaina family"
+		msg="ARM64: dts/vendor: Import camera DTS for lahaina family"
 		importer "SUBTREE" "arch/arm64/boot/dts/vendor/qcom/camera" https://github.com/Divyanshu-Modi/kernel-camera-devicetree main "$msg"
-		msg="Arm64: dts/vendor: Import display dts for lahaina family"
+		msg="ARM64: dts/vendor: Import display DTS for lahaina family"
 		importer "SUBTREE" "arch/arm64/boot/dts/vendor/qcom/display" https://github.com/Divyanshu-Modi/kernel-display-devicetree main "$msg"
 	else
 		error 'Invalid target kernel version, supported kernel versions are 4.19 and 5.4'
