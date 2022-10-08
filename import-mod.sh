@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
+#
 # Copyright (C) 2022 Divyanshu-Modi <divyan.m05@gmail.com>
+#
 # based on <pig.priv@gmail.com> module importer
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 
 R='\033[1;31m'
 G='\033[1;32m'
