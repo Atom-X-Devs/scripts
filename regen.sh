@@ -33,14 +33,14 @@ err() {
 KERNEL_DIR=$PWD
 
 # The name of the device for which the kernel is built
-MODEL="Asus Zenfone Max Pro M1"
+MODEL="Asus Zenfone Max Pro M2"
 
 # The codename of the device
-DEVICE="X00TD"
+DEVICE="X01BD"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=asus/X00TD_defconfig
+DEFCONFIG=asus/X01BD_defconfig
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
