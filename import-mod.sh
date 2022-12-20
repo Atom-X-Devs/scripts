@@ -152,11 +152,11 @@ readcmd() {
 
 # Add remote
 addremote() {
-	if [ "$num" -lt '4' ]; then
+	if [ "$num" -lt '5' ]; then
 		url=qcom-opensource/wlan/$mod
-	elif [ "$num" = '6' ]; then
+	elif [ "$num" = '7' ]; then
 		url=qcom-opensource/$mod
-	elif [ "$num" = '7' ] || [ "$num" = '8' ]; then
+	elif [ "$num" = '8' ] || [ "$num" = '9' ]; then
 		url=qcom/opensource/$mod
 	else
 		url=opensource/$mod
@@ -168,7 +168,7 @@ addremote() {
 
 # Update/Import modules
 moduler() {
-	if [ "$num" -lt '4' ]; then
+	if [ "$num" -lt '5' ]; then
 		msg="staging: $mod: Import"
 		dir="drivers/staging/$mod"
 	else
@@ -208,47 +208,50 @@ indicatemodir() {
 		mod=fw-api
 		;;
 	4)
+		mod=prima
+		;;
+	5)
 		mod=audio-kernel
 		prefix=audio
 		;;
-	5)
+	6)
 		mod=camera-kernel
 		prefix=camera
 		;;
-	6)
+	7)
 		mod=data-kernel
 		prefix=data
 		;;
-	7)
+	8)
 		mod=datarmnet
 		prefix=$mod
 		;;
-	8)
+	9)
 		mod=datarmnet-ext
 		prefix=$mod
 		;;
-	9)
+	10)
 		mod=dataipa
 		prefix=$mod
 		;;
-	10)
+	11)
 		mod=display-drivers
 		prefix=display
 		;;
-	11)
+	12)
 		mod=video-driver
 		prefix=video
 		;;
-	12)
+	13)
 		exfat_import
 		;;
-	13)
+	14)
 		mainline_exfat_import
 		;;
-	14)
+	15)
 		kprofiles_import
 		;;
-	15)
+	16)
 		dts_import
 		;;
 	*)
@@ -257,7 +260,7 @@ indicatemodir() {
 		;;
 	esac
 
-	if [ "$num" -lt '12' ]; then
+	if [ "$num" -lt '13' ]; then
 		moduler
 	fi
 }
@@ -266,25 +269,25 @@ indicatemodir() {
 init() {
 	COLUMNS=45
 	PS3="Select a module: "
-	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "audio-kernel"
+	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "prima" "audio-kernel"
 		"camera-kernel" "data-kernel" "datarmnet" "datarmnet-ext"
 		"dataipa" "display-drivers" "video-driver" "exFAT driver"
 		"mainline exFAT driver" "kprofiles" "device tree source")
 	select modules in "${options[@]}"; do
 		num=$REPLY
 		case $num in
-		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15)
-			if [ "$num" -le '15' ]; then
+		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16)
+			if [ "$num" -le '16' ]; then
 				if [[ -z $br ]]; then
 					read -rp "Target tag / branch: " br
 				fi
 				read -rp "Import (i) / Update (u): " option
-				if [[ "$option" != u && "$num" -lt '12' ]]; then
+				if [[ "$option" != u && "$num" -lt '13' ]]; then
 					read -rp "Target cmd: merge (m) subtree (s) " cmd
 				else
 					cmd=m
 				fi
-			elif [[ $num == "15" ]]; then
+			elif [[ $num == "16" ]]; then
 				read -rp "Target kernel version: " kv
 			fi
 			indicatemodir
