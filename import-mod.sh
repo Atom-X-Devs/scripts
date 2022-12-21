@@ -117,6 +117,20 @@ mainline_exfat_import() {
 	fi
 }
 
+# Import tfa98xx codecs
+tfa98_import() {
+	read -rp "Enter branch name: " branchname
+	if [ "$option" = 'u' ]; then
+		msg="techpack/audio: codecs: Updated tfa98xx codec from CLO"
+		importer "UPDATE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx branchname "$msg"
+		success "Successfully updated tfa98xx codec"
+	else
+		msg="techpack/audio: codecs: Initial tfa98xx codec import from CLO"
+		importer "MERGE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx branchname "$msg"
+		success "Successfully imported tfa98xx codec"
+	fi
+}
+
 # Import Kprofiles
 kprofiles_import() {
 	if [ "$option" = 'u' ]; then
@@ -254,6 +268,9 @@ indicatemodir() {
 	16)
 		dts_import
 		;;
+	17)
+		tfa98_import
+		;;
 	*)
 		clear
 		error "Invalid target input, aborting!"
@@ -272,12 +289,12 @@ init() {
 	options=("qcacld-3.0" "qca-wifi-host-cmn" "fw-api" "prima" "audio-kernel"
 		"camera-kernel" "data-kernel" "datarmnet" "datarmnet-ext"
 		"dataipa" "display-drivers" "video-driver" "exFAT driver"
-		"mainline exFAT driver" "kprofiles" "device tree source")
+		"mainline exFAT driver" "kprofiles" "device tree source" "tfa98xx")
 	select modules in "${options[@]}"; do
 		num=$REPLY
 		case $num in
-		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16)
-			if [ "$num" -le '16' ]; then
+		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17)
+			if [ "$num" -le '17' ]; then
 				if [[ -z $br ]]; then
 					read -rp "Target tag / branch: " br
 				fi
