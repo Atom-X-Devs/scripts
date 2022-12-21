@@ -122,11 +122,11 @@ tfa98_import() {
     read -rp "Enter branch name: " branchname
     if [ "$option" = 'u' ]; then
         msg="techpack/audio: codecs: Updated tfa98xx codec from CLO"
-        importer "UPDATE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx branchname "$msg"
+        importer "UPDATE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx "$branchname" "$msg"
         success "Successfully updated tfa98xx codec"
     else
         msg="techpack/audio: codecs: Initial tfa98xx codec import from CLO"
-        importer "MERGE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx branchname "$msg"
+        importer "MERGE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx "$branchname" "$msg"
         success "Successfully imported tfa98xx codec"
     fi
 }
