@@ -1,86 +1,99 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2022-2023, Tashfin Shakeer Rhythm <tashfinshakeerrhythm@gmail.com>.
+# Revision: 09-01-2023 V3.2
 
-# Script For Regenerating Defconfig of Android arm64 Kernel
-#
-# Copyright (c) 2022 ElectroPerf <kunmun@aospa.co>
-#
-# SPDX-License-Identifier: Apache-2.0
-#
+# Variables for colors
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+YELLOW="\033[1;33m"
+CYAN="\033[0;36m"
 
-# Function to show an informational message
-msg() {
-	echo -e "\e[1;32m$*\e[0m"
+# Function to create a box for the prompt screen
+# Source: https://unix.stackexchange.com/a/70616
+box_out() {
+	local s=("$@") b w
+	for l in "${s[@]}"; do
+		((w < ${#l})) && { b="$l"; w="${#l}"; }
+	done
+	tput setaf 3
+	echo " -${b//?/-}-
+| ${b//?/ } |"
+	for l in "${s[@]}"; do
+		printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+	done
+	echo "| ${b//?/ } |
+ -${b//?/-}-"
+	tput sgr 0
 }
 
-err() {
-	echo -e "\e[1;41m$*\e[0m"
-}
+# Prompt screen
+echo -e "\n$GREEN Regen Method"
+box_out "1. Regenerate full defconfigs" \
+	"2. Regenerate with Savedefconfig" \
+	"e. EXIT"
+echo -ne "\n$CYAN Enter your choice or press 'e' to go back to shell: "
 
-##------------------------------------------------------##
-##----------Basic Informations, COMPULSORY--------------##
+read -r selector
 
-# The defult directory where the kernel should be placed
-KERNEL_DIR=$PWD
+# Variables for different defconfig regeneration types
+case $selector in
+1)
+	CONFIG=".config"
+	COMMIT_MSG="defconfigs: xiaomi: Regenerate Defconfigs"
+	;;
+2)
+	SAVE_DFCF="savedefconfig"
+	CONFIG="defconfig"
+	COMMIT_MSG="defconfigs: xiaomi: Regenerate with Savedefconfig"
+	;;
+e)
+	echo -e "\n$CYAN Exiting..."
+	sleep 1
+	exit 0
+	;;
+esac
 
-# The name of the device for which the kernel is built
-MODEL="Asus Zenfone Max Pro M2"
-
-# The codename of the device
-DEVICE="X01BD"
-
-# The defconfig which should be used. Get it from config.gz from
-# your device or check source
-DEFCONFIG=asus/X01BD_defconfig
-
-# Show manufacturer info
-MANUFACTURERINFO="ASUSTek Computer Inc."
-
-# Clone Toolchain
-git clone --depth=1 git@gitlab.com:ElectroPerf/atom-x-clang.git clang
-
-# Define Kernel Arch
-KARCH=arm64
-
-# Commit Your Changes
-AUTO_COMMIT=0
-
-msg "|| Export Kernel Arch ||"
-
-export ARCH=$KARCH
-
-msg "|| Cleaning Sources ||"
-
-make clean && make mrproper
-
-msg "|| Regenerating Defconfig ||"
-
-export KBUILD_BUILD_USER="Kunmun@Atom-X-Devs"
-TC_DIR=$KERNEL_DIR/clang
-KBUILD_COMPILER_STRING=$("$TC_DIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-PATH=$TC_DIR/bin/:$PATH
-
-export PATH KBUILD_COMPILER_STRING
-PROCS=$(nproc --all)
-export PROCS
-
-msg "|| Make Defconfig ||"
-make O=out $DEFCONFIG \
-	CROSS_COMPILE=aarch64-linux-gnu- \
-	CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-	CC=clang \
-	LLVM=1 \
-	LLVM_IAS=1 \
-	LD="ld.lld" \
-	LD_LIBRARY_PATH=$TC_DIR/lib
-
-msg "|| Moving Regenerated Defconfig ||"
-
-cp -af out/.config arch/$KARCH/configs/$DEFCONFIG
-
-if [ $AUTO_COMMIT = 1 ]; then
-	msg "|| Commiting Changes ||"
-
-	git add arch/$KARCH/configs/$DEFCONFIG
-	git commit -m "$DEFCONFIG: Regenerate" --signoff
-
+# Bail out with an error message if invalid option is chosen
+if [[ "$selector" != "1" && "$selector" != "2" ]]; then
+	echo -e "\n$RED Error! Invalid option chosen!"
+	exit 1
 fi
+
+# Clone clang if not available
+if [ ! -f "neutron-clang" ]; then
+	echo -e "\n$YELLOW Clang not found! Cloning Neutron-clang..."
+	mkdir neutron-clang && cd neutron-clang
+	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
+	cd ..
+fi
+
+# Export necessary build variables
+export PATH="$(pwd)/neutron-clang/bin/:$PATH"
+export ARCH=arm64
+export LLVM=1
+export LLVM_IAS=1
+
+# Array to regenerate defconfigs in a loop
+# Add or remove device names based on your needs
+DEVICE+=("whyred" "tulip" "wayne" "wayne-old" "wayne-oss" "lavender")
+
+# Start regeneration of defconfigs
+for prefix in "${DEVICE[@]}"; do
+	# Define the device name prefixes
+	echo "$prefix"
+
+	# Variables for defconfig name and path
+	DFCF="vendor/${prefix}-perf_defconfig"
+	DFCF_PATH="arch/arm64/configs/$DFCF"
+
+	# Begin regeneration
+	make "O=regen" "$DFCF" $SAVE_DFCF
+	mv regen/"$CONFIG" "$DFCF_PATH"
+	rm -rf regen
+	git add "$DFCF_PATH"
+	echo -e ""
+done
+
+# Commit changes
+git commit -asm "$COMMIT_MSG"
