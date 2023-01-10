@@ -3,13 +3,22 @@
 # Copyright (c) 2022-2023, Tashfin Shakeer Rhythm <tashfinshakeerrhythm@gmail.com>.
 # Revision: 11-01-2023 V3.3
 
-# Variables for colors
+## Global variables and arrays
+# Colors
 RED="\033[1;31m"
 GREEN="\033[1;32m"
 YELLOW="\033[1;33m"
 CYAN="\033[0;36m"
 
-# Function to create a box for the prompt screen
+# Compiler's path
+C_PATH="$(pwd)/clang"
+
+# Array to regenerate defconfigs in a loop
+# Add or remove device names based on your needs
+DEVICE+=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
+
+## Functions
+# Create a box for the prompt screen
 # Source: https://unix.stackexchange.com/a/70616
 box_out() {
 	local s=("$@") b w
@@ -27,6 +36,7 @@ box_out() {
 	tput sgr 0
 }
 
+## Create build environment
 # Prompt screen
 echo -e "\n$GREEN	Regeneration Method"
 box_out '1. Regenerate full defconfigs' \
@@ -60,9 +70,6 @@ if [[ "$selector" != "1" && "$selector" != "2" ]]; then
 	exit 1
 fi
 
-# Variable for compiler's path
-C_PATH="$(pwd)/clang"
-
 # Clone clang if not available
 if test ! -d "$C_PATH"; then
 	echo -e "\n${YELLOW}Clang not found! Cloning Neutron-clang..."
@@ -77,11 +84,7 @@ export ARCH='arm64'
 export LLVM=1
 export LLVM_IAS=1
 
-# Array to regenerate defconfigs in a loop
-# Add or remove device names based on your needs
-DEVICE+=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
-
-# Start regeneration of defconfigs
+## Start regeneration of defconfigs
 for prefix in "${DEVICE[@]}"; do
 	# Define the device name prefixes
 	echo "$prefix"
