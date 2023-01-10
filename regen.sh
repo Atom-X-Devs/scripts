@@ -65,7 +65,7 @@ if test ! -d "neutron-clang"; then
 	echo -e "\n$YELLOW Clang not found! Cloning Neutron-clang..."
 	mkdir neutron-clang && cd neutron-clang
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
-	cd ..
+	cd -
 fi
 
 # Export necessary build variables
