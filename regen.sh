@@ -61,7 +61,7 @@ if [[ "$selector" != "1" && "$selector" != "2" ]]; then
 fi
 
 # Clone clang if not available
-if [ ! -f "neutron-clang" ]; then
+if test ! -d "neutron-clang"; then
 	echo -e "\n$YELLOW Clang not found! Cloning Neutron-clang..."
 	mkdir neutron-clang && cd neutron-clang
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
