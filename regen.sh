@@ -28,11 +28,11 @@ box_out() {
 }
 
 # Prompt screen
-echo -e "\n$GREEN Regen Method"
+echo -e "\n$GREEN	Regeneration Method"
 box_out '1. Regenerate full defconfigs' \
 	'2. Regenerate with Savedefconfig' \
 	'e. EXIT'
-echo -ne "\n$CYAN Enter your choice or press 'e' to go back to shell: "
+echo -ne "\n${CYAN}Enter your choice or press 'e' to go back to shell: "
 
 read -r selector
 
@@ -48,7 +48,7 @@ case $selector in
 	COMMIT_MSG='defconfigs: xiaomi: Regenerate with Savedefconfig'
 	;;
 e)
-	echo -e "\n$CYAN Exiting..."
+	echo -e "\n${CYAN}Exiting..."
 	sleep 1
 	exit 0
 	;;
@@ -56,13 +56,13 @@ esac
 
 # Bail out with an error message if invalid option is chosen
 if [[ "$selector" != "1" && "$selector" != "2" ]]; then
-	echo -e "\n$RED Error! Invalid option chosen!"
+	echo -e "\n${RED}Error! Invalid option chosen!"
 	exit 1
 fi
 
 # Clone clang if not available
 if test ! -d 'neutron-clang'; then
-	echo -e "\n$YELLOW Clang not found! Cloning Neutron-clang..."
+	echo -e "\n${YELLOW}Clang not found! Cloning Neutron-clang..."
 	mkdir neutron-clang && cd neutron-clang
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
 	cd -
