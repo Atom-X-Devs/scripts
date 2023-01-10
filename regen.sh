@@ -60,16 +60,19 @@ if [[ "$selector" != "1" && "$selector" != "2" ]]; then
 	exit 1
 fi
 
+# Variable for compiler's path
+C_PATH="$(pwd)/clang"
+
 # Clone clang if not available
-if test ! -d 'neutron-clang'; then
+if test ! -d "$C_PATH"; then
 	echo -e "\n${YELLOW}Clang not found! Cloning Neutron-clang..."
-	mkdir neutron-clang && cd neutron-clang
+	mkdir $C_PATH && cd $C_PATH
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
 	cd -
 fi
 
 # Export necessary build variables
-export PATH="$(pwd)/neutron-clang/bin/:$PATH"
+export PATH="$C_PATH/bin/:$PATH"
 export ARCH='arm64'
 export LLVM=1
 export LLVM_IAS=1
