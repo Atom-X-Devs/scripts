@@ -29,9 +29,9 @@ box_out() {
 
 # Prompt screen
 echo -e "\n$GREEN Regen Method"
-box_out "1. Regenerate full defconfigs" \
-	"2. Regenerate with Savedefconfig" \
-	"e. EXIT"
+box_out '1. Regenerate full defconfigs' \
+	'2. Regenerate with Savedefconfig' \
+	'e. EXIT'
 echo -ne "\n$CYAN Enter your choice or press 'e' to go back to shell: "
 
 read -r selector
@@ -39,13 +39,13 @@ read -r selector
 # Variables for different defconfig regeneration types
 case $selector in
 1)
-	CONFIG=".config"
-	COMMIT_MSG="defconfigs: xiaomi: Regenerate Defconfigs"
+	CONFIG='.config'
+	COMMIT_MSG='defconfigs: xiaomi: Regenerate Defconfigs'
 	;;
 2)
-	SAVE_DFCF="savedefconfig"
-	CONFIG="defconfig"
-	COMMIT_MSG="defconfigs: xiaomi: Regenerate with Savedefconfig"
+	SAVE_DFCF='savedefconfig'
+	CONFIG='defconfig'
+	COMMIT_MSG='defconfigs: xiaomi: Regenerate with Savedefconfig'
 	;;
 e)
 	echo -e "\n$CYAN Exiting..."
@@ -61,7 +61,7 @@ if [[ "$selector" != "1" && "$selector" != "2" ]]; then
 fi
 
 # Clone clang if not available
-if test ! -d "neutron-clang"; then
+if test ! -d 'neutron-clang'; then
 	echo -e "\n$YELLOW Clang not found! Cloning Neutron-clang..."
 	mkdir neutron-clang && cd neutron-clang
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
@@ -70,13 +70,13 @@ fi
 
 # Export necessary build variables
 export PATH="$(pwd)/neutron-clang/bin/:$PATH"
-export ARCH=arm64
+export ARCH='arm64'
 export LLVM=1
 export LLVM_IAS=1
 
 # Array to regenerate defconfigs in a loop
 # Add or remove device names based on your needs
-DEVICE+=("whyred" "tulip" "wayne" "wayne-old" "wayne-oss" "lavender")
+DEVICE+=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
 
 # Start regeneration of defconfigs
 for prefix in "${DEVICE[@]}"; do
@@ -87,12 +87,14 @@ for prefix in "${DEVICE[@]}"; do
 	DFCF="vendor/${prefix}-perf_defconfig"
 	DFCF_PATH="arch/arm64/configs/$DFCF"
 
-	# Begin regeneration
-	make "O=regen" "$DFCF" $SAVE_DFCF
+	# Begin regeneration...
+	# Do not quote $SAVE_DFCF as it will become an
+	# empty string if option 1 is chosen at the selector
+	make O=regen "$DFCF" $SAVE_DFCF
 	mv regen/"$CONFIG" "$DFCF_PATH"
 	rm -rf regen
 	git add "$DFCF_PATH"
-	echo -e ""
+	echo -e ''
 done
 
 # Commit changes
