@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2022-2023, Tashfin Shakeer Rhythm <tashfinshakeerrhythm@gmail.com>.
-# Revision: 11-01-2023 V3.3
+# Revision: 13-01-2023 V3.4
 
 ## Global variables and arrays
 # Colors
