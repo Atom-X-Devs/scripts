@@ -17,6 +17,12 @@ C_PATH="$(pwd)/clang"
 # Add or remove device names based on your needs
 DEVICE+=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
 
+# Check availability of device name(s)
+if [[ -z "$DEVICE" ]]; then
+	echo -e "\n${RED}Error! Device name is not pre-defined"
+	exit 1
+fi
+
 ## Functions
 # Create a box for the prompt screen
 # Source: https://unix.stackexchange.com/a/70616
@@ -37,12 +43,12 @@ box_out() {
 }
 
 ## Create build environment
-# Prompt screen
+# Prompt screen with the box style menu
 echo -e "\n$GREEN	Regeneration Method"
 box_out '1. Regenerate full defconfigs' \
 	'2. Regenerate with Savedefconfig' \
 	'e. EXIT'
-echo -ne "\n${CYAN}Enter your choice or press 'e' to go back to shell: "
+echo -e "\n${CYAN}Enter your choice or press 'e' to go back to shell: \c"
 
 read -r selector
 
@@ -62,16 +68,15 @@ e)
 	sleep 1
 	exit 0
 	;;
+*)
+	echo -e "\n${RED}Error! Invalid option chosen"
+	sleep 1
+	exit 1
+	;;
 esac
 
-# Bail out with an error message if invalid option is chosen
-if [[ "$selector" != "1" && "$selector" != "2" ]]; then
-	echo -e "\n${RED}Error! Invalid option chosen!"
-	exit 1
-fi
-
 # Clone clang if not available
-if test ! -d "$C_PATH"; then
+if [[ ! -d "$C_PATH" ]]; then
 	echo -e "\n${YELLOW}Clang not found! Cloning Neutron-clang..."
 	mkdir $C_PATH && cd $C_PATH
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
@@ -86,9 +91,6 @@ export LLVM_IAS=1
 
 ## Start regeneration of defconfigs
 for prefix in "${DEVICE[@]}"; do
-	# Define the device name prefixes
-	echo "$prefix"
-
 	# Variables for defconfig name and path
 	DFCF="vendor/${prefix}-perf_defconfig"
 	DFCF_PATH="arch/arm64/configs/$DFCF"
@@ -104,4 +106,4 @@ for prefix in "${DEVICE[@]}"; do
 done
 
 # Commit changes
-git commit -asm "$COMMIT_MSG"
+git commit -sm "$COMMIT_MSG"
