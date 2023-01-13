@@ -15,10 +15,10 @@ C_PATH="$(pwd)/clang"
 
 # Array to regenerate defconfigs in a loop
 # Add or remove device names based on your needs
-DEVICE+=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
+DEVICE=('whyred' 'tulip' 'wayne' 'wayne-old' 'wayne-oss' 'lavender')
 
 # Check availability of device name(s)
-if [[ -z "$DEVICE" ]]; then
+if [[ ! ${DEVICE[*]} ]]; then
 	echo -e "\n${RED}Error! Device name is not pre-defined"
 	exit 1
 fi
@@ -48,9 +48,8 @@ echo -e "\n$GREEN	Regeneration Method"
 box_out '1. Regenerate full defconfigs' \
 	'2. Regenerate with Savedefconfig' \
 	'e. EXIT'
-echo -e "\n${CYAN}Enter your choice or press 'e' to go back to shell: \c"
 
-read -r selector
+read -p "$(echo -e "${CYAN}Enter your choice or press 'e' to go back to shell: ")" -r selector
 
 # Variables for different defconfig regeneration types
 case $selector in
@@ -76,11 +75,11 @@ e)
 esac
 
 # Clone clang if not available
-if [[ ! -d "$C_PATH" ]]; then
+if [[ ! -d $C_PATH ]]; then
 	echo -e "\n${YELLOW}Clang not found! Cloning Neutron-clang..."
-	mkdir $C_PATH && cd $C_PATH
+	mkdir "$C_PATH" && cd "$C_PATH" || exit
 	bash <(curl -s https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman) -S
-	cd -
+	cd - || exit
 fi
 
 # Export necessary build variables
@@ -96,7 +95,7 @@ for prefix in "${DEVICE[@]}"; do
 	DFCF_PATH="arch/arm64/configs/$DFCF"
 
 	# Begin regeneration...
-	# Do not quote $SAVE_DFCF as it will become an
+	# Do not double quote $SAVE_DFCF as it will become an
 	# empty string if option 1 is chosen at the selector
 	make O=regen "$DFCF" $SAVE_DFCF
 	mv regen/"$CONFIG" "$DFCF_PATH"
