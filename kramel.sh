@@ -28,7 +28,7 @@ PROCS="$(nproc --all)"
 # Paths
 KERNEL_DIR="${PWD}"
 TOOLCHAIN="${KERNEL_DIR}/../toolchains"
-GZIP_DIR="${TOOLCHAIN}//neutron-gzip"
+GZIP_DIR="${TOOLCHAIN}/neutron-gzip"
 COREUTILS_DIR="${TOOLCHAIN}/neutron-coreutils"
 ZIP_DIR="${KERNEL_DIR}/../4.19-ak3"
 
