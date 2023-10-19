@@ -49,7 +49,7 @@ importer() {
     DIR=$2
     REPO=$3
     TAG=$4
-    if [[ -d $DIR && $MTD == "SUBTREE" ]]; then
+    if [[ -d $DIR && $MTD == SUBTREE ]]; then
         error "$DIR directory is already present."
     fi
     if [[ $MTD == MERGE || $MTD == UPDATE ]]; then
@@ -74,10 +74,10 @@ importer() {
 
 # Import dts
 dts_import() {
-    if [ "$kv" = '4.19' ]; then
+    if [[ $kv == 4.19 ]]; then
         msg="ARM64: dts/vendor: Import DTS for SDM660 family"
         importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Atom-X-Devs/android_kernel_qcom_devicetree "$msg"
-    elif [ "$kv" = '5.4' ]; then
+    elif [[ $kv == 5.4 ]]; then
         msg="ARM64: dts/vendor: Import DTS for lahaina family"
         importer "SUBTREE" "arch/arm64/boot/dts/vendor" https://github.com/Divyanshu-Modi/kernel-devicetree AtomX "$msg"
         msg="ARM64: dts/vendor: Import camera DTS for lahaina family"
@@ -93,7 +93,7 @@ dts_import() {
 
 # Import exFAT
 exfat_import() {
-    if [ "$option" = 'u' ]; then
+    if [[ $option == u ]]; then
         msg="fs/exfat: Update from arter97/exfat-linux"
         importer "UPDATE" "fs/exfat" https://github.com/arter97/exfat-linux master "$msg"
         success "Successfully updated exFAT"
@@ -106,7 +106,7 @@ exfat_import() {
 
 # Import mainline exFAT
 mainline_exfat_import() {
-    if [ "$option" = 'u' ]; then
+    if [[ $option == u ]]; then
         msg="fs/exfat: Update from namjaejeon/linux-exfat-oot"
         importer "UPDATE" "fs/exfat" https://github.com/namjaejeon/linux-exfat-oot master "$msg"
         success "Successfully updated mainline exFAT"
@@ -120,7 +120,7 @@ mainline_exfat_import() {
 # Import tfa98xx codecs
 tfa98_import() {
     read -rp "Enter branch name: " branchname
-    if [ "$option" = 'u' ]; then
+    if [[ $option == u ]]; then
         msg="techpack/audio: codecs: Updated tfa98xx codec from CLO"
         importer "UPDATE" "techpack/audio/asoc/codecs/tfa9874" http://git.codelinaro.org/external/mas/tfa98xx "$branchname" "$msg"
         success "Successfully updated tfa98xx codec"
@@ -133,7 +133,7 @@ tfa98_import() {
 
 # Import Kprofiles
 kprofiles_import() {
-    if [ "$option" = 'u' ]; then
+    if [[ $option == u ]]; then
         msg="kprofiles: Update from dakkshesh07/Kprofiles"
         importer "UPDATE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
         success "Successfully updated Kprofiles"
@@ -152,7 +152,7 @@ readcmd() {
             importer "SUBTREE" "$dir" clo/"$mod" "$br" "$msg from $msg1"
             ;;
         m)
-            if [ "$option" = 'u' ]; then
+	    if [[ $option == u ]]; then
                 importer "UPDATE" "$dir" clo/"$mod" "$br"
             else
                 importer "MERGE" "$dir" clo/"$mod" "$br"
@@ -166,11 +166,11 @@ readcmd() {
 
 # Add remote
 addremote() {
-    if [ "$num" -lt '5' ]; then
+    if [[ $num -lt 5 ]]; then
         url=qcom-opensource/wlan/$mod
-    elif [ "$num" = '7' ]; then
+    elif [[ $num == 7 ]]; then
         url=qcom-opensource/$mod
-    elif [ "$num" = '8' ] || [ "$num" = '9' ]; then
+    elif [[ $num == 8 || $num == 9 ]]; then
         url=qcom/opensource/$mod
     else
         url=opensource/$mod
@@ -182,7 +182,7 @@ addremote() {
 
 # Update/Import modules
 moduler() {
-    if [ "$num" -lt '5' ]; then
+    if [[ $num -lt 5 ]]; then
         msg="staging: $mod: Import"
         dir="drivers/staging/$mod"
     else
@@ -192,7 +192,7 @@ moduler() {
     if ! grep -q "$mod" .git/config; then
         addremote
     fi
-    if [[ -d $dir && $option == "u" ]]; then
+    if [[ -d $dir && $option == u ]]; then
         cmd=m
     fi
     readcmd
@@ -207,7 +207,7 @@ moduler() {
 
 # Indicate module directories
 indicatemodir() {
-    if [[ $br == "" ]]; then
+    if [[ $br == '' ]]; then
         error "tag not defined"
     fi
 
@@ -277,7 +277,7 @@ indicatemodir() {
             ;;
     esac
 
-    if [ "$num" -lt '13' ]; then
+    if [[ $num -lt 13 ]]; then
         moduler
     fi
 }
@@ -294,17 +294,17 @@ init() {
         num=$REPLY
         case $num in
             1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17)
-                if [ "$num" -le '17' ]; then
+                if [[ $num -le 17 ]]; then
                     if [[ -z $br ]]; then
                         read -rp "Target tag / branch: " br
                     fi
                     read -rp "Import (i) / Update (u): " option
-                    if [[ $option != u && $num -lt '13' ]]; then
+                    if [[ $option != u && $num -lt 13 ]]; then
                         read -rp "Target cmd: merge (m) subtree (s) " cmd
                     else
                         cmd=m
                     fi
-                elif [[ $num == "16" ]]; then
+                elif [[ $num == 16 ]]; then
                     read -rp "Target kernel version: " kv
                 fi
                 indicatemodir
