@@ -2,9 +2,7 @@
 # Copyright (c) 2021-2023, Tashfin Shakeer Rhythm <tashfinshakeerrhythm@gmail.com>.
 # Version: 10.1
 # Revision: 29-06-2023
-# shellcheck disable=SC2312
 # shellcheck disable=SC1091
-# shellcheck disable=SC2154
 
 ## Global variables
 # Colors
@@ -26,7 +24,7 @@ CODENAME2='jasmine'
 PROCS="$(nproc --all)"
 
 # Paths
-KERNEL_DIR="${PWD}"
+KERNEL_DIR="$(pwd)"
 TOOLCHAIN="${KERNEL_DIR}/../toolchains"
 GZIP_DIR="${TOOLCHAIN}/neutron-gzip"
 COREUTILS_DIR="${TOOLCHAIN}/neutron-coreutils"
@@ -85,7 +83,7 @@ for args in "${@}"; do
 	case "${args}" in
 	"--clang")
 		C_PATH="${TOOLCHAIN}/Neutron-Clang-BOLT"
-		KBUILD_COMPILER_STRING="$(${C_PATH}/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')"
+		KBUILD_COMPILER_STRING="$("${C_PATH}"/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')"
 		MAKE+=(
 			O=work
 			CC='ccache clang'
@@ -97,12 +95,12 @@ for args in "${@}"; do
 		;;
 	"--gcc")
 		C_PATH="${TOOLCHAIN}/gcc64/bin:${TOOLCHAIN}/gcc32"
-		KBUILD_COMPILER_STRING="$(${TOOLCHAIN}/gcc64/bin/aarch64-elf-gcc --version | head -n 1)"
+		KBUILD_COMPILER_STRING="$("${TOOLCHAIN}"/gcc64/bin/aarch64-elf-gcc --version | head -n 1)"
 		MAKE+=(
 			O=work
 			CC=aarch64-elf-gcc
 			LD="${TOOLCHAIN}/gcc64/bin/aarch64-elf-ld.lld"
-			LD_LIBRARY_PATH=${C_PATH}/lib:${LD_LIBRARY_PART}
+			LD_LIBRARY_PATH="${C_PATH}"/lib:"${LD_LIBRARY_PART}"
 			AR=llvm-ar
 			NM=llvm-nm
 			OBJCOPY=llvm-objcopy
@@ -208,7 +206,7 @@ if [[ -f "${KERNEL_DIR}/work/arch/arm64/boot/Image.gz-dtb" ]]; then
 
 	cp "${KERNEL_DIR}/work/arch/arm64/boot/Image.gz-dtb" "${ZIP_DIR}"
 	cd "${ZIP_DIR}" || exit 1
-	zip -r9 "${ZIP_NAME}.zip" * -x README.md LICENSE FUNDING.yml zipsigner*
+	zip -r9 "${ZIP_NAME}.zip" ./* -x README.md LICENSE FUNDING.yml zipsigner*
 	java -jar zipsigner* "${ZIP_NAME}.zip" "${FINAL_ZIP}"
 	echo -e "\n${CYAN}	Pushing kernel zip...\n"
 	if [[ $PARTITION == NON-DYNAMIC ]]; then
@@ -217,8 +215,8 @@ if [[ -f "${KERNEL_DIR}/work/arch/arm64/boot/Image.gz-dtb" ]]; then
 		tg_post_build "${FINAL_ZIP}" "${CAM}+${HAPTIC}+${PARTITION}"
 	fi
 	cp "${FINAL_ZIP}" "${KERNEL_DIR}/out"
-	rm -rf *.zip Image.gz-dtb
-	cd ${KERNEL_DIR}
+	rm -rf ./*.zip Image.gz-dtb
+	cd "${KERNEL_DIR}" || exit 1
 
 	# Print the build information
 	tg_post_msg "
