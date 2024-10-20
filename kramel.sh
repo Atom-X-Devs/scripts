@@ -78,6 +78,14 @@ tg_post_build() {
 		-F caption="$2 | <b>MD5 Checksum : </b><code>${MD5CHECK}</code>"
 }
 
+set_config() {
+	./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -e "$1"
+}
+
+unset_config() {
+	./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -d "$1"
+}
+
 ## Argument list
 for args in "${@}"; do
 	case "${args}" in
@@ -139,18 +147,18 @@ for args in "${@}"; do
 		;;
 	"--thin-lto")
 		LTO_VARIANT='THIN_LTO'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -e 'CONFIG_LTO_CLANG_THIN'
+		set_config 'CONFIG_LTO_CLANG_THIN'
 		;&
 	"--full-lto")
 		LTO_VARIANT='FULL_LTO'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -d 'CONFIG_LTO_NONE'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -e 'CONFIG_LTO_CLANG_FULL'
+		unset_config 'CONFIG_LTO_NONE'
+		set_config 'CONFIG_LTO_CLANG_FULL'
 		;;
 	"--non-lto")
 		LTO_VARIANT='NON_LTO'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -d 'CONFIG_LTO_CLANG_THIN'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -d 'CONFIG_LTO_CLANG_FULL'
-		./scripts/config --file "${KERNEL_DIR}/arch/arm64/configs/${DFCF}" -e 'CONFIG_LTO_NONE'
+		unset_config 'CONFIG_LTO_CLANG_THIN'
+		unset_config 'CONFIG_LTO_CLANG_FULL'
+		set_config 'CONFIG_LTO_NONE'
 		;;
 	"--help")
 		help
