@@ -134,12 +134,12 @@ tfa98_import() {
 # Import Kprofiles
 kprofiles_import() {
 	if [[ $option == u ]]; then
-		msg="kprofiles: Update from dakkshesh07/Kprofiles"
-		importer "UPDATE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
+		msg="kprofiles: Update from beakthoven/Kprofiles"
+		importer "UPDATE" "drivers/misc/kprofiles" https://github.com/beakthoven/Kprofiles main "$msg"
 		success "Successfully updated Kprofiles"
 	else
 		msg="drivers/misc: Introduce KernelSpace Profile Modes"
-		importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/dakkshesh07/Kprofiles main "$msg"
+		importer "SUBTREE" "drivers/misc/kprofiles" https://github.com/beakthoven/Kprofiles main "$msg"
 		success "Successfully imported Kprofiles"
 	fi
 }
